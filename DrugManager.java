@@ -1,0 +1,659 @@
+
+import java.sql.PreparedStatement;
+import java.awt.Color;
+import java.sql.Connection;
+import java.sql.ResultSet;
+import javax.swing.JOptionPane;
+import javax.swing.table.DefaultTableModel;
+import javax.swing.table.TableModel;
+import java.util.Date;
+
+
+/*
+ * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
+ * Click nbfs://nbhost/SystemFileSystem/Templates/GUIForms/JFrame.java to edit this template
+ */
+
+/**
+ *
+ * @author User
+ */
+public class DrugManager extends javax.swing.JFrame {
+
+    /**
+     * Creates new form DrugManager
+     */
+    public DrugManager() {
+        initComponents();
+        setDrugDetailsToTable();
+    }
+    
+    String drugName;
+    String category;
+    int drug_Id;
+    int quantity;
+    DefaultTableModel model;
+    
+    
+    //put drug details inside the table
+    public void setDrugDetailsToTable(){
+        
+        try{
+            Connection con = DBConnection.getConnection();
+            java.sql.Statement st = con.createStatement();
+            ResultSet rs = st.executeQuery("select * from DrugDetails");
+            
+            while (rs.next()){
+            String drugIds = rs.getString("drugId");
+            String drugNames = rs.getString("drugName");
+            String categorys = rs.getString ("category");
+            String quantitys = rs.getString ("quantity");
+            Date expdate = rs.getDate("expiry_date");
+            
+            Object[] obj = {drugIds, drugNames, categorys, quantitys, expdate};
+            model = (DefaultTableModel)managetable.getModel();
+            model.addRow(obj);
+       
+            }
+            
+        }catch(Exception e) {
+            e.printStackTrace();
+        }
+    }
+    public boolean addDrugs(){
+        boolean isAdded = false;
+        drug_Id = Integer.parseInt(txt_drugId.getText());
+        drugName = txt_drugName.getText();
+        category = txt_category.getText();
+        quantity = Integer.parseInt(txt_quantity.getText());
+        
+        java.util.Date utilDate = txt_expiryDate.getDate();
+    
+        // Convert java.util.Date to java.sql.Date
+        java.sql.Date expiryDate = new java.sql.Date(utilDate.getTime());
+        
+        try{
+                Connection con = DBConnection.getConnection();
+                String sql = "insert into DrugDetails values(?,?,?,?,?)";
+                PreparedStatement pst = con.prepareStatement(sql);
+                
+                pst.setInt(1, drug_Id);
+                pst.setString(2, drugName);
+                pst.setString(3, category);
+                pst.setInt(4, quantity);
+                pst.setDate(5, expiryDate);
+                
+                int rowCount = pst.executeUpdate();
+                if (rowCount > 0) {
+                    isAdded = true;
+                }else {
+                    isAdded = false;
+                }
+        }catch(Exception e){
+            e.printStackTrace();
+            }
+        return isAdded;
+    
+    }
+    
+    public void clearTable(){
+        DefaultTableModel model = (DefaultTableModel) managetable.getModel();
+        model.setRowCount(0);
+    }
+    
+    //method too update drugs
+    public boolean updateDrugs(){
+        boolean isUpdated = false;
+        drug_Id = Integer.parseInt(txt_drugId.getText());
+        drugName = txt_drugName.getText();
+        category = txt_category.getText();
+        quantity = Integer.parseInt(txt_quantity.getText());
+        
+        java.util.Date utilDate = txt_expiryDate.getDate();
+    
+        // Convert java.util.Date to java.sql.Date
+        java.sql.Date expiryDate = new java.sql.Date(utilDate.getTime());
+
+        
+        
+        try{
+            Connection con = DBConnection.getConnection();
+            String sql = "update DrugDetails set drugName = ?,category = ?, quantity = ?, expiry_date = ? where drugId = ?";
+            PreparedStatement pst = con.prepareStatement(sql);
+            pst.setString(1, drugName);
+            pst.setString(2, category);
+            pst.setInt(3, quantity);
+            pst.setDate(4, expiryDate);
+            pst.setInt(5, drug_Id);
+            
+            int rowCount = pst.executeUpdate();
+            if (rowCount > 0) {
+                isUpdated = true;
+            }else {
+                isUpdated = false;
+            }
+        
+    }catch (Exception e){
+        e.printStackTrace();    
+    }
+    return isUpdated;
+    }
+    //deleting drugs 
+    public boolean deleteDrugs(){
+        boolean isDeleted = false;
+        drug_Id = Integer.parseInt(txt_drugId.getText());
+        
+        try{
+            Connection con = DBConnection.getConnection();
+            String sql = "delete from DrugDetails where drugId = ?";
+            PreparedStatement pst = con.prepareStatement(sql);
+            pst.setInt(1, drug_Id);
+            
+            int rowCount = pst.executeUpdate();
+            if (rowCount > 0) {
+                isDeleted = true;
+            }else {
+                isDeleted = false;
+            }
+        }catch (Exception e){
+            e.printStackTrace();
+        }
+        return isDeleted;   
+    }
+    
+    public boolean searchDrugs() {
+    boolean isDisplay = false;
+    drugName = txt_drugSearch.getText();
+    category = txt_drugSearch.getText();
+
+    try {
+        Connection con = DBConnection.getConnection();
+        String sql = "select * from DrugDetails where drugName = ? OR category = ?";
+        PreparedStatement pst = con.prepareStatement(sql);
+        pst.setString(1, drugName);
+        pst.setString(2, category);
+
+        ResultSet rs = pst.executeQuery();
+
+        while (rs.next()) {
+            String drugId = rs.getString("drugId");
+            String drugNames = rs.getString("drugName");
+            String categorys = rs.getString("category");
+            String quantitys = rs.getString("quantity");
+            Date expdate = rs.getDate( "expiry_date");
+
+            Object[] obj = {drugId, drugNames, categorys, quantitys, expdate};
+            model = (DefaultTableModel) managetable.getModel();
+            model.addRow(obj);
+        }
+
+        isDisplay = true;
+
+    } catch (Exception e) {
+        e.printStackTrace();
+    }
+    return isDisplay;
+}
+
+    /**
+     * This method is called from within the constructor to initialize the form.
+     * WARNING: Do NOT modify this code. The content of this method is always
+     * regenerated by the Form Editor.
+     */
+    @SuppressWarnings("unchecked")
+    // <editor-fold defaultstate="collapsed" desc="Generated Code">//GEN-BEGIN:initComponents
+    private void initComponents() {
+
+        jPanel1 = new javax.swing.JPanel();
+        jPanel2 = new javax.swing.JPanel();
+        jLabel1 = new javax.swing.JLabel();
+        txt_quantity = new app.bolivia.swing.JCTextField();
+        jLabel17 = new javax.swing.JLabel();
+        jLabel15 = new javax.swing.JLabel();
+        txt_drugName = new app.bolivia.swing.JCTextField();
+        jLabel9 = new javax.swing.JLabel();
+        jLabel4 = new javax.swing.JLabel();
+        jLabel16 = new javax.swing.JLabel();
+        jLabel18 = new javax.swing.JLabel();
+        txt_drugId = new app.bolivia.swing.JCTextField();
+        jLabel19 = new javax.swing.JLabel();
+        jLabel20 = new javax.swing.JLabel();
+        txt_category = new app.bolivia.swing.JCTextField();
+        jButton1 = new javax.swing.JButton();
+        jButton2 = new javax.swing.JButton();
+        jButton3 = new javax.swing.JButton();
+        jLabel10 = new javax.swing.JLabel();
+        jLabel6 = new javax.swing.JLabel();
+        txt_expiryDate = new com.toedter.calendar.JDateChooser();
+        jPanel3 = new javax.swing.JPanel();
+        jPanel4 = new javax.swing.JPanel();
+        jLabel2 = new javax.swing.JLabel();
+        jScrollPane2 = new javax.swing.JScrollPane();
+        managetable = new javax.swing.JTable();
+        jLabel3 = new javax.swing.JLabel();
+        txt_drugSearch = new app.bolivia.swing.JCTextField();
+        jLabel5 = new javax.swing.JLabel();
+        jLabel21 = new javax.swing.JLabel();
+        jButton4 = new javax.swing.JButton();
+
+        setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
+        setUndecorated(true);
+        getContentPane().setLayout(new org.netbeans.lib.awtextra.AbsoluteLayout());
+
+        jPanel1.setBackground(new java.awt.Color(0, 204, 204));
+        jPanel1.setLayout(new org.netbeans.lib.awtextra.AbsoluteLayout());
+
+        jPanel2.setBackground(new java.awt.Color(0, 153, 153));
+        jPanel2.setLayout(new org.netbeans.lib.awtextra.AbsoluteLayout());
+
+        jLabel1.setFont(new java.awt.Font("Segoe UI", 1, 14)); // NOI18N
+        jLabel1.setIcon(new javax.swing.ImageIcon(getClass().getResource("/AddNewBookIcons/AddNewBookIcons/icons8_Rewind_48px.png"))); // NOI18N
+        jLabel1.setText("Back");
+        jLabel1.addMouseListener(new java.awt.event.MouseAdapter() {
+            public void mouseClicked(java.awt.event.MouseEvent evt) {
+                jLabel1MouseClicked(evt);
+            }
+        });
+        jPanel2.add(jLabel1, new org.netbeans.lib.awtextra.AbsoluteConstraints(0, 0, -1, -1));
+
+        jPanel1.add(jPanel2, new org.netbeans.lib.awtextra.AbsoluteConstraints(10, 0, 90, 40));
+
+        txt_quantity.setBackground(new java.awt.Color(0, 153, 153));
+        txt_quantity.setBorder(javax.swing.BorderFactory.createMatteBorder(0, 0, 2, 0, new java.awt.Color(153, 0, 153)));
+        txt_quantity.setForeground(new java.awt.Color(255, 255, 255));
+        txt_quantity.setFont(new java.awt.Font("Segoe UI", 0, 14)); // NOI18N
+        txt_quantity.setPlaceholder("Enter Drug Quanity");
+        txt_quantity.addFocusListener(new java.awt.event.FocusAdapter() {
+            public void focusLost(java.awt.event.FocusEvent evt) {
+                txt_quantityFocusLost(evt);
+            }
+        });
+        jPanel1.add(txt_quantity, new org.netbeans.lib.awtextra.AbsoluteConstraints(130, 440, -1, -1));
+
+        jLabel17.setFont(new java.awt.Font("Perpetua", 1, 18)); // NOI18N
+        jLabel17.setForeground(new java.awt.Color(255, 255, 255));
+        jLabel17.setIcon(new javax.swing.ImageIcon(getClass().getResource("/icons/icons/quantity.png"))); // NOI18N
+        jPanel1.add(jLabel17, new org.netbeans.lib.awtextra.AbsoluteConstraints(30, 420, 100, 60));
+
+        jLabel15.setFont(new java.awt.Font("Perpetua", 1, 18)); // NOI18N
+        jLabel15.setForeground(new java.awt.Color(255, 255, 255));
+        jLabel15.setText("Drug Quantity");
+        jPanel1.add(jLabel15, new org.netbeans.lib.awtextra.AbsoluteConstraints(150, 410, 130, 20));
+
+        txt_drugName.setBackground(new java.awt.Color(0, 153, 153));
+        txt_drugName.setBorder(javax.swing.BorderFactory.createMatteBorder(0, 0, 2, 0, new java.awt.Color(153, 0, 153)));
+        txt_drugName.setForeground(new java.awt.Color(255, 255, 255));
+        txt_drugName.setPlaceholder("Enter Drug Name");
+        jPanel1.add(txt_drugName, new org.netbeans.lib.awtextra.AbsoluteConstraints(130, 250, -1, -1));
+
+        jLabel9.setFont(new java.awt.Font("Perpetua", 1, 18)); // NOI18N
+        jLabel9.setForeground(new java.awt.Color(255, 255, 255));
+        jLabel9.setIcon(new javax.swing.ImageIcon(getClass().getResource("/icons/icons/nameid.png"))); // NOI18N
+        jPanel1.add(jLabel9, new org.netbeans.lib.awtextra.AbsoluteConstraints(30, 240, 80, 50));
+
+        jLabel4.setFont(new java.awt.Font("Perpetua", 1, 18)); // NOI18N
+        jLabel4.setForeground(new java.awt.Color(255, 255, 255));
+        jLabel4.setText("Drug name");
+        jPanel1.add(jLabel4, new org.netbeans.lib.awtextra.AbsoluteConstraints(140, 210, 110, 20));
+
+        jLabel16.setFont(new java.awt.Font("Perpetua", 1, 18)); // NOI18N
+        jLabel16.setForeground(new java.awt.Color(255, 255, 255));
+        jLabel16.setText("Drug Id");
+        jPanel1.add(jLabel16, new org.netbeans.lib.awtextra.AbsoluteConstraints(150, 120, 100, 20));
+
+        jLabel18.setFont(new java.awt.Font("Perpetua", 1, 18)); // NOI18N
+        jLabel18.setForeground(new java.awt.Color(255, 255, 255));
+        jLabel18.setIcon(new javax.swing.ImageIcon(getClass().getResource("/icons/icons/id.png"))); // NOI18N
+        jPanel1.add(jLabel18, new org.netbeans.lib.awtextra.AbsoluteConstraints(30, 140, 60, 60));
+
+        txt_drugId.setBackground(new java.awt.Color(0, 153, 153));
+        txt_drugId.setBorder(javax.swing.BorderFactory.createMatteBorder(0, 0, 2, 0, new java.awt.Color(153, 0, 153)));
+        txt_drugId.setForeground(new java.awt.Color(255, 255, 255));
+        txt_drugId.setFont(new java.awt.Font("Segoe UI", 0, 14)); // NOI18N
+        txt_drugId.setPlaceholder("Enter Drug ID");
+        txt_drugId.addFocusListener(new java.awt.event.FocusAdapter() {
+            public void focusLost(java.awt.event.FocusEvent evt) {
+                txt_drugIdFocusLost(evt);
+            }
+        });
+        jPanel1.add(txt_drugId, new org.netbeans.lib.awtextra.AbsoluteConstraints(130, 160, -1, -1));
+
+        jLabel19.setFont(new java.awt.Font("Perpetua", 1, 18)); // NOI18N
+        jLabel19.setForeground(new java.awt.Color(255, 255, 255));
+        jLabel19.setText("Drug Category");
+        jPanel1.add(jLabel19, new org.netbeans.lib.awtextra.AbsoluteConstraints(150, 320, 120, 20));
+
+        jLabel20.setFont(new java.awt.Font("Perpetua", 1, 18)); // NOI18N
+        jLabel20.setForeground(new java.awt.Color(255, 255, 255));
+        jLabel20.setIcon(new javax.swing.ImageIcon(getClass().getResource("/icons/icons/category.png"))); // NOI18N
+        jPanel1.add(jLabel20, new org.netbeans.lib.awtextra.AbsoluteConstraints(30, 340, 60, 60));
+
+        txt_category.setBackground(new java.awt.Color(0, 153, 153));
+        txt_category.setBorder(javax.swing.BorderFactory.createMatteBorder(0, 0, 2, 0, new java.awt.Color(153, 0, 153)));
+        txt_category.setForeground(new java.awt.Color(255, 255, 255));
+        txt_category.setFont(new java.awt.Font("Segoe UI", 0, 14)); // NOI18N
+        txt_category.setPlaceholder("Enter Category");
+        txt_category.addFocusListener(new java.awt.event.FocusAdapter() {
+            public void focusLost(java.awt.event.FocusEvent evt) {
+                txt_categoryFocusLost(evt);
+            }
+        });
+        jPanel1.add(txt_category, new org.netbeans.lib.awtextra.AbsoluteConstraints(130, 360, -1, -1));
+
+        jButton1.setBackground(new java.awt.Color(51, 51, 255));
+        jButton1.setFont(new java.awt.Font("Segoe UI Black", 1, 14)); // NOI18N
+        jButton1.setText("Update");
+        jButton1.setBorder(new javax.swing.border.SoftBevelBorder(javax.swing.border.BevelBorder.RAISED, null, new java.awt.Color(51, 51, 51), new java.awt.Color(102, 0, 102), new java.awt.Color(0, 102, 102)));
+        jButton1.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                jButton1ActionPerformed(evt);
+            }
+        });
+        jPanel1.add(jButton1, new org.netbeans.lib.awtextra.AbsoluteConstraints(180, 620, 150, -1));
+
+        jButton2.setBackground(new java.awt.Color(255, 0, 0));
+        jButton2.setFont(new java.awt.Font("Segoe UI Black", 1, 14)); // NOI18N
+        jButton2.setText("Delete");
+        jButton2.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                jButton2ActionPerformed(evt);
+            }
+        });
+        jPanel1.add(jButton2, new org.netbeans.lib.awtextra.AbsoluteConstraints(100, 680, 140, -1));
+
+        jButton3.setBackground(new java.awt.Color(0, 153, 0));
+        jButton3.setFont(new java.awt.Font("Segoe UI Black", 1, 14)); // NOI18N
+        jButton3.setText("Add");
+        jButton3.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                jButton3ActionPerformed(evt);
+            }
+        });
+        jPanel1.add(jButton3, new org.netbeans.lib.awtextra.AbsoluteConstraints(20, 620, 150, -1));
+
+        jLabel10.setFont(new java.awt.Font("Perpetua", 1, 18)); // NOI18N
+        jLabel10.setForeground(new java.awt.Color(255, 255, 255));
+        jLabel10.setIcon(new javax.swing.ImageIcon(getClass().getResource("/icons/icons/nameid.png"))); // NOI18N
+        jPanel1.add(jLabel10, new org.netbeans.lib.awtextra.AbsoluteConstraints(30, 510, 80, 50));
+
+        jLabel6.setFont(new java.awt.Font("Perpetua", 1, 18)); // NOI18N
+        jLabel6.setForeground(new java.awt.Color(255, 255, 255));
+        jLabel6.setText("Expiry Date");
+        jPanel1.add(jLabel6, new org.netbeans.lib.awtextra.AbsoluteConstraints(150, 490, 110, 20));
+        jPanel1.add(txt_expiryDate, new org.netbeans.lib.awtextra.AbsoluteConstraints(130, 520, 190, 40));
+
+        getContentPane().add(jPanel1, new org.netbeans.lib.awtextra.AbsoluteConstraints(0, 0, 340, 750));
+
+        jPanel3.setBackground(new java.awt.Color(255, 255, 255));
+        jPanel3.setLayout(new org.netbeans.lib.awtextra.AbsoluteLayout());
+
+        jPanel4.setBackground(new java.awt.Color(255, 255, 255));
+        jPanel4.addMouseMotionListener(new java.awt.event.MouseMotionAdapter() {
+            public void mouseMoved(java.awt.event.MouseEvent evt) {
+                jPanel4MouseMoved(evt);
+            }
+        });
+        jPanel4.addMouseListener(new java.awt.event.MouseAdapter() {
+            public void mouseClicked(java.awt.event.MouseEvent evt) {
+                jPanel4MouseClicked(evt);
+            }
+            public void mouseExited(java.awt.event.MouseEvent evt) {
+                jPanel4MouseExited(evt);
+            }
+        });
+        jPanel4.setLayout(new org.netbeans.lib.awtextra.AbsoluteLayout());
+
+        jLabel2.setFont(new java.awt.Font("Serif", 0, 24)); // NOI18N
+        jLabel2.setText("X");
+        jLabel2.addMouseMotionListener(new java.awt.event.MouseMotionAdapter() {
+            public void mouseMoved(java.awt.event.MouseEvent evt) {
+                jLabel2MouseMoved(evt);
+            }
+        });
+        jLabel2.addMouseListener(new java.awt.event.MouseAdapter() {
+            public void mouseClicked(java.awt.event.MouseEvent evt) {
+                jLabel2MouseClicked(evt);
+            }
+            public void mouseEntered(java.awt.event.MouseEvent evt) {
+                jLabel2MouseEntered(evt);
+            }
+            public void mouseExited(java.awt.event.MouseEvent evt) {
+                jLabel2MouseExited(evt);
+            }
+        });
+        jPanel4.add(jLabel2, new org.netbeans.lib.awtextra.AbsoluteConstraints(10, 0, 20, 20));
+
+        jPanel3.add(jPanel4, new org.netbeans.lib.awtextra.AbsoluteConstraints(980, 0, -1, 30));
+
+        managetable.setFont(new java.awt.Font("Yu Gothic UI Light", 1, 14)); // NOI18N
+        managetable.setModel(new javax.swing.table.DefaultTableModel(
+            new Object [][] {
+
+            },
+            new String [] {
+                "Drug_id", "Name", "Category", "Quantity", "Expiry"
+            }
+        ));
+        managetable.setGridColor(new java.awt.Color(0, 204, 204));
+        managetable.setRowHeight(30);
+        managetable.setShowGrid(true);
+        managetable.addMouseListener(new java.awt.event.MouseAdapter() {
+            public void mouseClicked(java.awt.event.MouseEvent evt) {
+                managetableMouseClicked(evt);
+            }
+        });
+        jScrollPane2.setViewportView(managetable);
+
+        jPanel3.add(jScrollPane2, new org.netbeans.lib.awtextra.AbsoluteConstraints(0, 180, 1010, 410));
+
+        jLabel3.setFont(new java.awt.Font("Trebuchet MS", 1, 24)); // NOI18N
+        jLabel3.setText("Manage Drugs Stock");
+        jPanel3.add(jLabel3, new org.netbeans.lib.awtextra.AbsoluteConstraints(400, 40, 240, 30));
+
+        txt_drugSearch.setBackground(new java.awt.Color(204, 204, 204));
+        txt_drugSearch.setBorder(javax.swing.BorderFactory.createMatteBorder(0, 0, 2, 0, new java.awt.Color(153, 0, 153)));
+        txt_drugSearch.setPlaceholder("Search Drug (Name, Category)");
+        jPanel3.add(txt_drugSearch, new org.netbeans.lib.awtextra.AbsoluteConstraints(500, 120, 240, -1));
+
+        jLabel5.setFont(new java.awt.Font("Perpetua", 1, 18)); // NOI18N
+        jLabel5.setText("Search");
+        jPanel3.add(jLabel5, new org.netbeans.lib.awtextra.AbsoluteConstraints(420, 120, 60, 30));
+
+        jLabel21.setFont(new java.awt.Font("Perpetua", 1, 18)); // NOI18N
+        jLabel21.setForeground(new java.awt.Color(255, 255, 255));
+        jLabel21.setIcon(new javax.swing.ImageIcon(getClass().getResource("/adminIcons/adminIcons/search.png"))); // NOI18N
+        jLabel21.addMouseListener(new java.awt.event.MouseAdapter() {
+            public void mouseClicked(java.awt.event.MouseEvent evt) {
+                jLabel21MouseClicked(evt);
+            }
+        });
+        jPanel3.add(jLabel21, new org.netbeans.lib.awtextra.AbsoluteConstraints(760, 120, 30, 30));
+
+        jButton4.setBackground(new java.awt.Color(204, 204, 204));
+        jButton4.setFont(new java.awt.Font("Segoe UI Black", 1, 14)); // NOI18N
+        jButton4.setText("view All");
+        jButton4.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                jButton4ActionPerformed(evt);
+            }
+        });
+        jPanel3.add(jButton4, new org.netbeans.lib.awtextra.AbsoluteConstraints(180, 120, 100, -1));
+
+        getContentPane().add(jPanel3, new org.netbeans.lib.awtextra.AbsoluteConstraints(340, 0, 1020, 750));
+
+        setSize(new java.awt.Dimension(1353, 748));
+        setLocationRelativeTo(null);
+    }// </editor-fold>//GEN-END:initComponents
+
+    private void jLabel1MouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_jLabel1MouseClicked
+        welcomePage welcome = new welcomePage();
+        welcome.setVisible(true);
+        this.dispose();
+    }//GEN-LAST:event_jLabel1MouseClicked
+
+    private void txt_quantityFocusLost(java.awt.event.FocusEvent evt) {//GEN-FIRST:event_txt_quantityFocusLost
+
+    }//GEN-LAST:event_txt_quantityFocusLost
+
+    private void txt_drugIdFocusLost(java.awt.event.FocusEvent evt) {//GEN-FIRST:event_txt_drugIdFocusLost
+        // TODO add your handling code here:
+    }//GEN-LAST:event_txt_drugIdFocusLost
+
+    private void txt_categoryFocusLost(java.awt.event.FocusEvent evt) {//GEN-FIRST:event_txt_categoryFocusLost
+        // TODO add your handling code here:
+    }//GEN-LAST:event_txt_categoryFocusLost
+
+    private void jButton1ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton1ActionPerformed
+        if (updateDrugs()== true){
+        JOptionPane.showMessageDialog(this, "drug updated successfully");
+        clearTable();
+        setDrugDetailsToTable();
+        }
+        else{
+             JOptionPane.showMessageDialog(this, "update failure!");
+                        }
+    }//GEN-LAST:event_jButton1ActionPerformed
+
+    private void jButton2ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton2ActionPerformed
+         if (deleteDrugs()== true){
+        JOptionPane.showMessageDialog(this, "drug deleted successfully");
+        clearTable();
+        setDrugDetailsToTable();
+        }
+        else{
+             JOptionPane.showMessageDialog(this, "delete failure!");
+                        }
+    }//GEN-LAST:event_jButton2ActionPerformed
+
+    private void jButton3ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton3ActionPerformed
+        if (addDrugs()== true){
+        JOptionPane.showMessageDialog(this, "drug added successfully");
+        clearTable();
+        setDrugDetailsToTable();
+        }
+        else{
+             JOptionPane.showMessageDialog(this, "addition failure!");
+                        }
+    }//GEN-LAST:event_jButton3ActionPerformed
+
+    private void jPanel4MouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_jPanel4MouseClicked
+       System.exit(0);
+    }//GEN-LAST:event_jPanel4MouseClicked
+
+    private void jPanel4MouseMoved(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_jPanel4MouseMoved
+        jPanel4.setBackground(Color.RED);
+    }//GEN-LAST:event_jPanel4MouseMoved
+
+    private void jPanel4MouseExited(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_jPanel4MouseExited
+        jPanel4.setBackground(Color.white);
+    }//GEN-LAST:event_jPanel4MouseExited
+
+    private void jLabel2MouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_jLabel2MouseClicked
+        System.exit(0);
+    }//GEN-LAST:event_jLabel2MouseClicked
+
+    private void managetableMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_managetableMouseClicked
+        
+        int rowNo = managetable.getSelectedRow();
+        TableModel model = managetable.getModel();
+        
+        txt_drugId.setText(model.getValueAt(rowNo, 0).toString());
+        txt_drugName.setText(model.getValueAt(rowNo,1).toString());
+        txt_category.setText(model.getValueAt(rowNo, 2).toString());
+        txt_quantity.setText(model.getValueAt(rowNo,3).toString());
+        java.util.Date expiryDate = (java.util.Date) model.getValueAt(rowNo, 4);
+        txt_expiryDate.setDate(expiryDate);
+        
+    }//GEN-LAST:event_managetableMouseClicked
+
+    private void jLabel2MouseMoved(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_jLabel2MouseMoved
+        jLabel2.setBackground(Color.RED);
+    }//GEN-LAST:event_jLabel2MouseMoved
+
+    private void jLabel2MouseEntered(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_jLabel2MouseEntered
+        jLabel2.setBackground(Color.RED);
+    }//GEN-LAST:event_jLabel2MouseEntered
+
+    private void jLabel2MouseExited(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_jLabel2MouseExited
+        jLabel2.setBackground(Color.RED);
+    }//GEN-LAST:event_jLabel2MouseExited
+
+    private void jLabel21MouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_jLabel21MouseClicked
+        clearTable();
+        searchDrugs();
+    }//GEN-LAST:event_jLabel21MouseClicked
+
+    private void jButton4ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton4ActionPerformed
+        clearTable();
+        setDrugDetailsToTable();
+    }//GEN-LAST:event_jButton4ActionPerformed
+
+    /**
+     * @param args the command line arguments
+     */
+    public static void main(String args[]) {
+        /* Set the Nimbus look and feel */
+        //<editor-fold defaultstate="collapsed" desc=" Look and feel setting code (optional) ">
+        /* If Nimbus (introduced in Java SE 6) is not available, stay with the default look and feel.
+         * For details see http://download.oracle.com/javase/tutorial/uiswing/lookandfeel/plaf.html 
+         */
+        try {
+            for (javax.swing.UIManager.LookAndFeelInfo info : javax.swing.UIManager.getInstalledLookAndFeels()) {
+                if ("Nimbus".equals(info.getName())) {
+                    javax.swing.UIManager.setLookAndFeel(info.getClassName());
+                    break;
+                }
+            }
+        } catch (ClassNotFoundException ex) {
+            java.util.logging.Logger.getLogger(DrugManager.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
+        } catch (InstantiationException ex) {
+            java.util.logging.Logger.getLogger(DrugManager.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
+        } catch (IllegalAccessException ex) {
+            java.util.logging.Logger.getLogger(DrugManager.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
+        } catch (javax.swing.UnsupportedLookAndFeelException ex) {
+            java.util.logging.Logger.getLogger(DrugManager.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
+        }
+        //</editor-fold>
+
+        /* Create and display the form */
+        java.awt.EventQueue.invokeLater(new Runnable() {
+            public void run() {
+                new DrugManager().setVisible(true);
+            }
+        });
+    }
+
+    // Variables declaration - do not modify//GEN-BEGIN:variables
+    private javax.swing.JButton jButton1;
+    private javax.swing.JButton jButton2;
+    private javax.swing.JButton jButton3;
+    private javax.swing.JButton jButton4;
+    private javax.swing.JLabel jLabel1;
+    private javax.swing.JLabel jLabel10;
+    private javax.swing.JLabel jLabel15;
+    private javax.swing.JLabel jLabel16;
+    private javax.swing.JLabel jLabel17;
+    private javax.swing.JLabel jLabel18;
+    private javax.swing.JLabel jLabel19;
+    private javax.swing.JLabel jLabel2;
+    private javax.swing.JLabel jLabel20;
+    private javax.swing.JLabel jLabel21;
+    private javax.swing.JLabel jLabel3;
+    private javax.swing.JLabel jLabel4;
+    private javax.swing.JLabel jLabel5;
+    private javax.swing.JLabel jLabel6;
+    private javax.swing.JLabel jLabel9;
+    private javax.swing.JPanel jPanel1;
+    private javax.swing.JPanel jPanel2;
+    private javax.swing.JPanel jPanel3;
+    private javax.swing.JPanel jPanel4;
+    private javax.swing.JScrollPane jScrollPane2;
+    private javax.swing.JTable managetable;
+    private app.bolivia.swing.JCTextField txt_category;
+    private app.bolivia.swing.JCTextField txt_drugId;
+    private app.bolivia.swing.JCTextField txt_drugName;
+    private app.bolivia.swing.JCTextField txt_drugSearch;
+    private com.toedter.calendar.JDateChooser txt_expiryDate;
+    private app.bolivia.swing.JCTextField txt_quantity;
+    // End of variables declaration//GEN-END:variables
+}
